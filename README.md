@@ -1,26 +1,49 @@
-# ATF and u-boot for mt798x
+# ATF and u-boot for mt798x with DHCPD
 
-A modified version of hanwckf's u-boot for mt798x by Yuzhii, with support for auto dhcp, and beautiful webui.(build with version 2022/2023/2024/2025)
+A modified version of hanwckf's U-Boot for MT798x by Yuzhii, with support for DHCPD and a beautiful web UI. (Builds available for versions 2022/2023/2024/2025)
 
-Support Actions to build automatically, generate normal/overclocking BL2. 
+Supports GitHub Actions for automatic builds, and can generate both normal and overclocked BL2.
+
+**Warnign: Flashing custom bootloaders can brick your device. Proceed with caution and at your own risk.**
 
 ## About bl-mt798x
 
-- https://cmi.hanwckf.top/p/mt798x-uboot-usage
+- <https://cmi.hanwckf.top/p/mt798x-uboot-usage>
 
-> Version-2022 WEBUI preview
+> Version-2022 WEB UI preview
 
 ![Version-2022](document/pictures/uboot-2022.png)
 
-> Version-2023/2024 WEBUI preview
+> Version-2023/2024 WEB UI preview
 
 ![Version-2023/2024](document/pictures/uboot-2023.png)
 
-> Version-2025 WEBUI preview
+> Version-2025 WEB UI preview
+
+U-Boot 2025 adds more features:
+
+- System info display
+- Factory (RF) update
+- Backup download
+- Web terminal
+- Environment manager
+- Device reboot
 
 ![Version-2025](document/pictures/uboot-2025.png)
 
-U-Boot-2025 support backup/sysinfo/reboot/factory(rf)-update function.
+You can configure the features you need.
+
+- [x] MTK_DHCPD
+  - [x] MTK_DHCPD_ENHANCED
+- Failsafe Web UI style:
+  - [x] WEBUI_FAILSAFE_UI_NEW
+  - [ ] WEBUI_FAILSAFE_UI_OLD
+- [x] WEBUI_FAILSAFE_FACTORY
+- [x] WEBUI_FAILSAFE_BACKUP
+- [x] WEBUI_FAILSAFE_ENV
+- [x] WEBUI_FAILSAFE_CONSOLE
+
+> Enable WEBUI_FAILSAFE_UI_OLD will use the traditional webui interface.
 
 ## Prepare
 
@@ -32,17 +55,14 @@ sudo apt install gcc-aarch64-linux-gnu build-essential flex bison libssl-dev dev
 
 ```bash
 chmod +x build.sh
-SOC=mt7981 BOARD=360t7 VERSION=2022 ./build.sh
-SOC=mt7981 BOARD=cmcc_a10 VERSION=2024 MULTI_LAYOUT=1 ./build.sh
+SOC=mt7981 BOARD=sn_r1 VERSION=2025 ./build.sh
+SOC=mt7981 BOARD=cmcc_a10 VERSION=2022 MULTI_LAYOUT=1 ./build.sh
 ```
 
-> SOC=mt7981/mt7986
-
-> VERSION=2022/2023/2024/2025
-
-> MULTI_LAYOUT=1 (Optional, only for multi-layout devices, e.g. xiaomi-wr30u, redmi-ax6000)
-
-> The diffence of every version
+- SOC=mt7981/mt7986
+- VERSION=2022/2023/2024/2025
+- MULTI_LAYOUT=1 (Optional, only for multi-layout devices, e.g. xiaomi-wr30u, redmi-ax6000)
+- Version differences:
 
 | Version | ATF | UBOOT |
 | --- | --- | --- |
@@ -51,7 +71,7 @@ SOC=mt7981 BOARD=cmcc_a10 VERSION=2024 MULTI_LAYOUT=1 ./build.sh
 | 2024 | 20240117-bacca82a8 | 20230718-09eda825 |
 | 2025 | 20250711 | 20250711 |
 
-Generate file will be in `output`
+Generated files will be in the `output`
 
 ## Generate GPT with python2.7
 
@@ -68,15 +88,15 @@ chmod +x generate_gpt.sh
 ./generate_gpt.sh
 ```
 
-Generate file will be in `output_gpt`
+Generated files will be in the `output_gpt`
 
-> You need add your device's partition info json file in "mt798x_gpt", like e.g. "atf-dir/tools/dev/gpt_editor/example/gpt.json"
+> You need to add your device's partition info JSON file in the "mt798x_gpt" directory, e.g. "atf-dir/tools/dev/gpt_editor/example/gpt.json".
 
-When you enable `SDMMC=1` like `SDMMC=1 ./generate_gpt.sh`, the generated gpt image will support MTK SDMMC.
+When you enable `SDMMC=1` (e.g. `SDMMC=1 ./generate_gpt.sh`), the generated GPT image will support MTK SDMMC.
 
 ### Show GPT info
 
-Create a directory named `mt798x_gpt_bin` in the respository root directory, and put your gpt bin files in it.
+Create a directory named `mt798x_gpt_bin` in the respository root directory, and put your GPT bin files in it.
 
 Then run:
 
@@ -85,7 +105,7 @@ chmod +x show_gpt.sh
 ./show_gpt.sh
 ```
 
-Then it will show the GPT partition info of all gpt bin files in `mt798x_gpt_bin` directory, and output to `gpt_info.txt` in `output_gpt` directory.
+Then it will display the GPT partition info of all GPT bin files in `mt798x_gpt_bin` directory, and output the results to `gpt_info.txt` in the `output_gpt` directory.
 
 ## Use Action to build
 
@@ -96,23 +116,23 @@ Then it will show the GPT partition info of all gpt bin files in `mt798x_gpt_bin
 - [ ] Multi-layout support (Only for multi-layout devices)
 - [ ] Special subnet support (Custom default IP for DHCPD)
 
-> Although you can customize the dhcpd subnet, but the mask is fixed to "255.255.255.0", so you must ensure your device is in this subnet.
+> Although you can customize the DHCPD subnet, the mask is fixed to "255.255.255.0", so you must ensure your device is in this subnet.
 
 ---
 
 ## FIT support
 
-This function is from 1715173329's [bl-mt798x-oss](https://github.com/1715173329/bl-mt798x-oss/tree/fit-example)
+This function is based on 1715173329's [bl-mt798x-oss](https://github.com/1715173329/bl-mt798x-oss/tree/fit-example)
 
-I based on his work to make a patch to support FIT image.
+I have created a patch based on his work to support FIT images.
 
-There only supports a limited number of models, If your device is not in the list, you can try to add support by yourself according to his work.
+Only a limited number of models are supported. If your device is not listed, you can try to add support yourself by following his work.
 
 ***BUT NOT TESTED YET!***
 
-So, **You MUST test it by yourself, and have risk of BRICK!**
+So, **you MUST test it yourself, and there is a risk of BRICKING your device!**
 
-There are two way to build.
+There are two ways to build:
 
 1. Apply patch and build Version 2022
 
@@ -121,9 +141,9 @@ There are two way to build.
     SOC=mt7981 BOARD=your_board VERSION=2022 ./build.sh
     ```
 
-2. Build on Actions
+2. Build via Actions
 
-Open the repository Actions tab, and choose "Build FIT BL2 and FIP" workflow, then run it.
+Open the repository's Actions tab, choose the "Build FIT BL2 and FIP" workflow, and run it.
 
 ---
 
