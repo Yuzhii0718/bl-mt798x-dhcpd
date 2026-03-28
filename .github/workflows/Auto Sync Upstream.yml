@@ -3,7 +3,7 @@ name: Auto Sync Upstream
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "0 0 0 * *"
 
 jobs:
   sync:
@@ -16,7 +16,7 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Auto Sync & Apply NW874 Config
+      - name: Sync only
         run: |
           set +e
           git config --global user.name "actions"
@@ -26,14 +26,8 @@ jobs:
           git remote add upstream https://github.com/Yuzhii0718/bl-mt798x-dhcpd.git
           git fetch upstream
 
-          git checkout -B nw874-256m upstream/master
+          git checkout nw874-256m
+          git merge --no-edit upstream/master || true
 
-          # 自动写入你的固定配置
-          echo "CONFIG_NMBM_MAX_BLOCKS=32" >> configs/nw874_defconfig
-          echo 'CONFIG_MTDPARTS_DEFAULT="nmbm0:1024k(bl2),512k(u-boot-env),2048k(factory),2048k(fip),232M(ubi),1M(stock-config),512k(stock-factory),4M(stock-log)"' >> configs/nw874_defconfig
-
-          git add .
-          git commit -m "auto sync upstream + apply nw874 256m config" || true
-          git push -f origin nw874-256m || true
-
+          git push origin nw874-256m || true
           exit 0
