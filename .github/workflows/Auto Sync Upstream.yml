@@ -1,33 +1,59 @@
+Auto Sync Upstream
+
 name: Auto Sync Upstream
 
 on:
+
   workflow_dispatch:
+
   schedule:
-    - cron: "0 0 0 * *"
+
+    - cron: "0 0 * * *"
+
+
 
 jobs:
+
   sync:
+
     runs-on: ubuntu-latest
+
     permissions:
+
       contents: write
+
     steps:
+
       - uses: actions/checkout@v6
+
         with:
+
           fetch-depth: 0
+
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Sync only
+
+
+      - name: Sync
+
         run: |
+
           set +e
+
           git config --global user.name "actions"
+
           git config --global user.email "actions@github.com"
 
           git remote remove upstream || true
+
           git remote add upstream https://github.com/Yuzhii0718/bl-mt798x-dhcpd.git
+
           git fetch upstream
 
           git checkout nw874-256m
+
           git merge --no-edit upstream/master || true
 
           git push origin nw874-256m || true
+
           exit 0
