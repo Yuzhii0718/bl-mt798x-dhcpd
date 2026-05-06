@@ -146,6 +146,12 @@ config MTD_SPI_NAND_WINBOND
 	help
 	  Add support for various WINBOND SPI Nand flash chips
 
+config MTD_SPI_NAND_WODPOSIT
+	bool "WODPOSIT SPI flash support"
+	default y if MTD_SPI_NAND_DEVICE_AUTOSELECT
+	help
+	  Add support for various WODPOSIT SPI Nand flash chips
+
 config MTD_SPI_NAND_XINCUN
 	bool "XINCUN SPI flash support"
 	default n if MTD_SPI_NAND_DEVICE_AUTOSELECT
