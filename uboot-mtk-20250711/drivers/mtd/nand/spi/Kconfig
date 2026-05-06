@@ -13,7 +13,7 @@ config MTD_SPI_NAND_DEVICE_AUTOSELECT
 	  By default, auto-selects frequent used SPI Nand flash chips.
 	  Enable by default: DOSILICON, ESMT, ETRON, FMSH, FORESEE, 
 	  GIGADEVICE, GSTO, MACRONIX, MICRON, PARAGON, SKYHIGH, TOSHIBA,
-	  WINBOND, XTX.
+	  WODPOSIT, WINBOND, XTX.
 	  Disable by default: ALLIANCEMEMORY, ATO, BIWIN, HIKSEMI, HYF,
 	  JSC, SILICONGO, UNIM, XINCUN, ZBIT.
 	  If you want to add support for more SPI Nand flash chips,
