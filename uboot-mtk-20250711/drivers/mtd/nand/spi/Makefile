@@ -23,6 +23,7 @@ spinand-$(CONFIG_MTD_SPI_NAND_SKYHIGH)				+= skyhigh.o
 spinand-$(CONFIG_MTD_SPI_NAND_TOSHIBA)				+= toshiba.o
 spinand-$(CONFIG_MTD_SPI_NAND_UNIM)					+= unim.o
 spinand-$(CONFIG_MTD_SPI_NAND_WINBOND)				+= winbond.o
+spinand-$(CONFIG_MTD_SPI_NAND_WODPOSIT)				+= wodposit.o
 spinand-$(CONFIG_MTD_SPI_NAND_XINCUN)				+= xincun.o
 spinand-$(CONFIG_MTD_SPI_NAND_XTX)					+= xtx.o
 spinand-$(CONFIG_MTD_SPI_NAND_ZBIT)					+= zbit.o
