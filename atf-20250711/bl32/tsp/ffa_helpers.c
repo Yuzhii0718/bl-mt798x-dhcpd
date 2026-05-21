@@ -187,9 +187,10 @@ bool memory_retrieve(struct mailbox *mb,
 	*total_length = ret._regs[1];
 	*frag_length = ret._regs[2];
 
-	/* Validate frag_length is less than total_length and mailbox size. */
+	/* Validate frag_length is less than total_length, mailbox size, and destination buffer. */
 	if (*frag_length == 0U || *total_length == 0U ||
-	    *frag_length > *total_length || *frag_length > (mb->rxtx_page_count * PAGE_SIZE)) {
+	    *frag_length > *total_length || *frag_length > (mb->rxtx_page_count * PAGE_SIZE) ||
+	    *frag_length > REGION_BUF_SIZE) {
 		ERROR("Invalid parameters!\n");
 		return false;
 	}
