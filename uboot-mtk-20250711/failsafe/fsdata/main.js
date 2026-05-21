@@ -593,6 +593,7 @@ function ajax(request) {
     method = "GET";
     request.data && (method = "POST");
     xhr.open(method, request.url);
+    method === "POST" && xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
     xhr.send(request.data);
 }
 
