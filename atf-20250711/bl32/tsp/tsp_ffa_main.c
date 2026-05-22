@@ -160,7 +160,8 @@ static int test_memory_send(ffa_endpoint_id16_t sender, uint64_t handle,
 		}
 
 		/* Validate frag_length is less than remaining mem_region_buffer size. */
-		if (frag_length + recv_length >= REGION_BUF_SIZE) {
+		if (recv_length >= REGION_BUF_SIZE ||
+				frag_length > REGION_BUF_SIZE - recv_length) {
 			ERROR("Out of memory!\n");
 			return FFA_ERROR_INVALID_PARAMETER;
 		}
