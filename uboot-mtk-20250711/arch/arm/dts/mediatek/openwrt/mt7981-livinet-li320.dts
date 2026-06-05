@@ -1,0 +1,193 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+
+/dts-v1/;
+#include "mt7981.dtsi"
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/input/linux-event-codes.h>
+
+/ {
+	#address-cells = <1>;
+	#size-cells = <1>;
+	model = "Livinet Li320";
+	compatible = "mediatek,mt7981", "mediatek,mt7981-rfb";
+
+	chosen {
+		stdout-path = &uart0;
+		tick-timer = &timer0;
+	};
+
+	memory@40000000 {
+		device_type = "memory";
+		reg = <0x40000000 0x20000000>;
+	};
+
+	gpio-keys {
+		compatible = "gpio-keys";
+
+		button-wps {
+			label = "wps";
+			linux,code = <KEY_WPS_BUTTON>;
+			gpios = <&pio 0 GPIO_ACTIVE_LOW>;
+		};
+
+		button-reset {
+			label = "reset";
+			linux,code = <KEY_RESTART>;
+			gpios = <&pio 1 GPIO_ACTIVE_LOW>;
+		};
+	};
+
+	gpio-leds {
+		compatible = "gpio-leds";
+
+		led-0 {
+			label = "green:wlan-50";
+			gpios = <&pio 2 GPIO_ACTIVE_LOW>;
+			default-state = "off";
+		};
+
+		led-1 {
+			label = "green:lan-1";
+			gpios = <&pio 9 GPIO_ACTIVE_LOW>;
+			default-state = "off";
+		};
+
+		led-2 {
+			label = "green:lan-2";
+			gpios = <&pio 10 GPIO_ACTIVE_LOW>;
+			default-state = "off";
+		};
+
+		led-3 {
+			label = "green:lan-3";
+			gpios = <&pio 11 GPIO_ACTIVE_LOW>;
+			default-state = "off";
+		};
+
+		led-4 {
+			label = "green:wlan-24";
+			gpios = <&pio 13 GPIO_ACTIVE_LOW>;
+			default-state = "off";
+		};
+
+		led-5 {
+			label = "red:wan";
+			gpios = <&pio 27 GPIO_ACTIVE_HIGH>;
+			default-state = "on";
+		};
+
+		running_led: led-6 {
+			label = "green:power";
+			gpios = <&pio 28 GPIO_ACTIVE_LOW>;
+			default-state = "off";
+		};
+
+		led-7 {
+			label = "green:wan";
+			gpios = <&pio 31 GPIO_ACTIVE_LOW>;
+			default-state = "off";
+		};
+
+		led-8 {
+			label = "green:mesh";
+			gpios = <&pio 35 GPIO_ACTIVE_LOW>;
+			default-state = "off";
+		};
+	};
+};
+
+&eth {
+	status = "okay";
+	mediatek,gmac-id = <0>;
+	phy-mode = "2500base-x";
+	mediatek,switch = "mt7531";
+	reset-gpios = <&pio 39 GPIO_ACTIVE_HIGH>;
+
+	fixed-link {
+		speed = <2500>;
+		full-duplex;
+	};
+};
+
+&pio {
+	spi_flash_pins: spi0-pins-func-1 {
+		mux {
+			function = "flash";
+			groups = "spi0", "spi0_wp_hold";
+		};
+
+		conf-pu {
+			pins = "SPI0_CS", "SPI0_HOLD", "SPI0_WP";
+			drive-strength = <MTK_DRIVE_8mA>;
+			bias-pull-up = <MTK_PUPD_SET_R1R0_11>;
+		};
+
+		conf-pd {
+			pins = "SPI0_CLK", "SPI0_MOSI", "SPI0_MISO";
+			drive-strength = <MTK_DRIVE_8mA>;
+			bias-pull-down = <MTK_PUPD_SET_R1R0_11>;
+		};
+	};
+};
+
+&spi0 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&spi_flash_pins>;
+	status = "okay";
+	must_tx;
+	enhance_timing;
+	dma_ext;
+	ipm_design;
+	support_quad;
+	tick_dly = <2>;
+	sample_sel = <0>;
+
+	spi_nand@0 {
+		compatible = "spi-nand";
+		reg = <0>;
+		spi-max-frequency = <52000000>;
+
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			partition@0 {
+				label = "bl2";
+				reg = <0x0 0x100000>;
+			};
+
+			partition@100000 {
+				label = "u-boot-env";
+				reg = <0x100000 0x80000>;
+			};
+
+			partition@180000 {
+				label = "factory";
+				reg = <0x180000 0x200000>;
+			};
+
+			partition@380000 {
+				label = "fip";
+				reg = <0x380000 0x200000>;
+			};
+
+			partition@580000 {
+				label = "ubi";
+				reg = <0x580000 0x7280000>;
+				compatible = "linux,ubi";
+			};
+		};
+	};
+};
+
+&uart0 {
+	mediatek,force-highspeed;
+	status = "okay";
+};
+
+&watchdog {
+	status = "disabled";
+};
