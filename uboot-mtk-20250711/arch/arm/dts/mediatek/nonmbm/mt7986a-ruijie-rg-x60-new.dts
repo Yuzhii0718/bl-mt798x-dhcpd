@@ -4,6 +4,6 @@
 #include "mt7986a-ruijie-rg-x60.dtsi"
 
 / {
-	model = "mt7986-ruijie-rg-x60-new";
-	compatible = "mediatek,mt7986", "mediatek,mt7986-rfb";
+	model = "Ruijie RG-X60 New";
+	compatible = "ruijie,rg-x60-new", "mediatek,mt7986a";
 };
