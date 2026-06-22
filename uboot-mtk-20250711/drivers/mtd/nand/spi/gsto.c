@@ -2,6 +2,8 @@
 /*
  * Copyright (c) 2023 Rockchip Electronics Co., Ltd
  *
+ * SPI NAND flash driver for GSTO (联和存储) devices.
+ *
  * Authors:
  *	Dingqiang Lin <jon.lin@rock-chips.com>
  */

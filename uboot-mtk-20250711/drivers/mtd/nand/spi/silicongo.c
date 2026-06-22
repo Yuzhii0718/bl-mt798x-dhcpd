@@ -2,6 +2,8 @@
 /*
  * Copyright (c) 2021 Rockchip Electronics Co., Ltd.
  *
+ * SPI NAND flash driver for SiliconGo (硅格) devices.
+ *
  * Authors:
  *	Dingqiang Lin <jon.lin@rock-chips.com>
  */
@@ -70,7 +72,7 @@ static const struct spinand_manufacturer_ops silicongo_spinand_manuf_ops = {
 
 const struct spinand_manufacturer silicongo_spinand_manufacturer = {
 	.id = SPINAND_MFR_SILICONGO,
-	.name = "silicongo",
+	.name = "SiliconGo",
 	.chips = silicongo_spinand_table,
 	.nchips = ARRAY_SIZE(silicongo_spinand_table),
 	.ops = &silicongo_spinand_manuf_ops,

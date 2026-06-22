@@ -2,6 +2,8 @@
 /*
  * Copyright (C) 2018 Stefan Roese <sr@denx.de>
  *
+ * SPI NAND flash driver for GigaDevice (兆易创新) devices.
+ *
  * Derived from drivers/mtd/nand/spi/micron.c
  *   Copyright (c) 2016-2017 Micron Technology, Inc.
  */

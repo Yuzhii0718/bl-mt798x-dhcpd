@@ -2,6 +2,8 @@
 /*
  * Copyright (c) 2024 Rockchip Electronics Co., Ltd.
  *
+ * SPI NAND flash driver for HIKSEMI (海康存储) devices.
+ *
  * Authors:
  *	Dingqiang Lin <jon.lin@rock-chips.com>
  */

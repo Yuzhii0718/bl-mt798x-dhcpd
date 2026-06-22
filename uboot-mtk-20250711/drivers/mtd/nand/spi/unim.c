@@ -2,6 +2,8 @@
 /*
  * Copyright (c) 2021 Rockchip Electronics Co., Ltd.
  *
+ * SPI NAND flash driver for UNIM (至讯创新) devices.
+ *
  * Authors:
  *	Dingqiang Lin <jon.lin@rock-chips.com>
  */

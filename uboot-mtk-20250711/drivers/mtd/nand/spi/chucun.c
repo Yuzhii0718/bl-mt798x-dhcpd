@@ -2,6 +2,8 @@
 /*
  * Copyright (c) 2026 Rockchip Electronics Co., Ltd.
  *
+ * SPI NAND flash driver for CHUCUN (楚存科技) devices.
+ *
  * Authors:
  *	Dingqiang Lin <jon.lin@rock-chips.com>
  */

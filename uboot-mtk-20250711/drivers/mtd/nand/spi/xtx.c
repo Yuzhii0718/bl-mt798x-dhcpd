@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
+ * SPI NAND flash driver for XTX (芯天下) devices.
+ *
  * Author:
  * Felix Matouschek <felix@matouschek.org>
  */

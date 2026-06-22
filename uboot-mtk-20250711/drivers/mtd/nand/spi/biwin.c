@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: (GPL-2.0+ OR MIT)
 /*
  * Copyright (c) 2021 Rockchip Electronics Co., Ltd.
+ *
+ * SPI NAND flash driver for BIWIN (佰维存储) devices.
+ *
  */
 
 #ifndef __UBOOT__

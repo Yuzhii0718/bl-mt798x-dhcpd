@@ -2,6 +2,8 @@
 /*
  * Copyright (c) 2024 Rockchip Electronics Co., Ltd.
  *
+ * SPI NAND flash driver for Zbit (恒烁半导体) devices.
+ *
  * Authors:
  *	Dingqiang Lin <jon.lin@rock-chips.com>
  */
@@ -199,7 +201,7 @@ static const struct spinand_manufacturer_ops zbit_spinand_manuf_ops = {
 
 const struct spinand_manufacturer zbit_spinand_manufacturer = {
 	.id = SPINAND_MFR_ZBIT,
-	.name = "ZBIT",
+	.name = "Zbit",
 	.chips = zbit_spinand_table,
 	.nchips = ARRAY_SIZE(zbit_spinand_table),
 	.ops = &zbit_spinand_manuf_ops,

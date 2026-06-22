@@ -2,6 +2,8 @@
 /*
  * Copyright (c) 2026 Rockchip Electronics Co., Ltd.
  *
+ * SPI NAND flash driver for MK(米客方德) devices.
+ *
  * Authors:
  *	Dingqiang Lin <jon.lin@rock-chips.com>
  */

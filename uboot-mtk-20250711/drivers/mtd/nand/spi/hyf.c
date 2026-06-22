@@ -2,6 +2,8 @@
 /*
  * Copyright (c) 2020-2021 Rockchip Electronics Co., Ltd.
  *
+ * SPI NAND flash driver for HeYangTek (扬贺扬) devices.
+ *
  * Authors:
  *	Dingqiang Lin <jon.lin@rock-chips.com>
  */
@@ -273,7 +275,7 @@ static const struct spinand_manufacturer_ops hyf_spinand_manuf_ops = {
 
 const struct spinand_manufacturer hyf_spinand_manufacturer = {
 	.id = SPINAND_MFR_HYF,
-	.name = "hyf",
+	.name = "HeYangTek",
 	.chips = hyf_spinand_table,
 	.nchips = ARRAY_SIZE(hyf_spinand_table),
 	.ops = &hyf_spinand_manuf_ops,

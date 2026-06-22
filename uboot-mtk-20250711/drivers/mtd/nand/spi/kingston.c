@@ -99,7 +99,7 @@ static const struct spinand_manufacturer_ops kingston_spinand_manuf_ops = {
 
 const struct spinand_manufacturer kingston_spinand_manufacturer = {
 	.id = SPINAND_MFR_KINGSTON,
-	.name = "kingston",
+	.name = "Kingston",
 	.chips = kingston_spinand_table,
 	.nchips = ARRAY_SIZE(kingston_spinand_table),
 	.ops = &kingston_spinand_manuf_ops,

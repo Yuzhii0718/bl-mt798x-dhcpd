@@ -2,6 +2,7 @@
 /*
  * Copyright (c) 2020 Grandstream Networks, Inc
  *
+ * SPI NAND flash driver for Foresee (江波龙旗下品牌) devices.
  * Authors:
  *	Carl <xjxia@grandstream.cn>
  */
@@ -220,7 +221,7 @@ static const struct spinand_manufacturer_ops foresee_spinand_manuf_ops = {
 
 const struct spinand_manufacturer foresee_spinand_manufacturer = {
 	.id = SPINAND_MFR_FORESEE,
-	.name = "foresee",
+	.name = "Foresee",
 	.chips = foresee_spinand_table,
 	.nchips = ARRAY_SIZE(foresee_spinand_table),
 	.ops = &foresee_spinand_manuf_ops,

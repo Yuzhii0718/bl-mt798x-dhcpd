@@ -2,6 +2,8 @@
 /*
  * Copyright (C) 2019 Jeff Kletsky
  *
+ * SPI NAND flash driver for Paragon (芯天下前称) devices.
+ *
  * Author: Jeff Kletsky <git-commits@allycomm.com>
  */
 

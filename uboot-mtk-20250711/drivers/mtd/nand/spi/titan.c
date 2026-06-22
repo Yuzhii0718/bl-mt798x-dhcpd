@@ -2,6 +2,8 @@
 /*
  * Copyright (c) 2026 Rockchip Electronics Co., Ltd.
  *
+ * SPI NAND flash driver for TITAN MICRO (天微电子) devices.
+ *
  * Authors:
  *	Dingqiang Lin <jon.lin@rock-chips.com>
  */

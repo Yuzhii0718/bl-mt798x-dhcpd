@@ -113,7 +113,7 @@ static const struct spinand_manufacturer_ops wodposit_spinand_manuf_ops = {
 
 const struct spinand_manufacturer wodposit_spinand_manufacturer = {
 	.id = SPINAND_MFR_WODPOSIT,
-	.name = "wodposit",
+	.name = "Wodposit",
 	.chips = wodposit_spinand_table,
 	.nchips = ARRAY_SIZE(wodposit_spinand_table),
 	.ops = &wodposit_spinand_manuf_ops,

@@ -2,6 +2,8 @@
 /*
  * Copyright (c) 2023 Rockchip Electronics Co., Ltd.
  *
+ * SPI NAND flash driver for XINCUN (芯存) devices.
+ *
  * Authors:
  *	Dingqiang Lin <jon.lin@rock-chips.com>
  */
