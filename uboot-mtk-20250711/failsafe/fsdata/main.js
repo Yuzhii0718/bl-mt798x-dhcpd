@@ -955,6 +955,7 @@ function ajax(request) {
     if (request.timeout) xhr.timeout = request.timeout;
     const method = request.data ? "POST" : "GET";
     xhr.open(method, request.url);
+    method === "POST" && xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
     xhr.send(request.data);
 }
 
