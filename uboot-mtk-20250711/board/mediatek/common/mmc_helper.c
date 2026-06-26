@@ -927,6 +927,20 @@ int boot_from_mmc_partition(u32 dev, u32 hwpart, const char *part_name,
 	return _boot_from_mmc_partition(mmc, part_name, do_boot);
 }
 
+int boot_from_mmc_offset(u32 dev, u32 hwpart, u64 offset, bool do_boot)
+{
+	struct mmc *mmc;
+
+	mmc_image_dev = NULL;
+	mmc_image_part = NULL;
+
+	mmc = _mmc_get_dev(dev, hwpart, false);
+	if (!mmc)
+		return -ENODEV;
+
+	return _boot_from_mmc(mmc, offset, do_boot);
+}
+
 static int mmc_image_read(struct image_read_priv *rpriv, void *buff, u64 addr,
 			   size_t size)
 {

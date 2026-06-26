@@ -44,6 +44,7 @@ int mmc_is_sd(u32 dev);
 
 int boot_from_mmc_partition(u32 dev, u32 hwpart, const char *part_name,
 			    bool do_boot);
+int boot_from_mmc_offset(u32 dev, u32 hwpart, u64 offset, bool do_boot);
 
 int mmc_boot_image(u32 dev, bool do_boot);
 

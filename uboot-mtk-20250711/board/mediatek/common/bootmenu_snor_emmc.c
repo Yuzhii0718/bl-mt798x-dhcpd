@@ -7,8 +7,10 @@
 
 #include "bootmenu_common.h"
 #include "autoboot_helper.h"
+#include "mtd_helper.h"
 #include "mmc_helper.h"
 
+#include <env.h>
 #include <errno.h>
 
 static int write_factory(void *priv, const struct data_part_entry *dpe,
@@ -93,9 +95,24 @@ static const struct data_part_entry snor_emmc_parts[] = {
 		.abbr = "fw",
 		.env_name = "bootfile",
 		.post_action = UPGRADE_ACTION_BOOT,
+#ifdef CONFIG_MTK_SNOR_MMC_FALLBACK_BOOT
+		.validate = generic_mtd_validate_fw,
+		.write = generic_mtd_write_fw,
+#else
+		.validate = generic_mmc_validate_fw,
+		.write = generic_mmc_write_fw,
+#endif
+	},
+#ifdef CONFIG_MTK_SNOR_MMC_FALLBACK_BOOT
+	{
+		.name = "Firmware (MMC)",
+		.abbr = "fw-mmc",
+		.env_name = "bootfile.mmc",
+		.post_action = UPGRADE_ACTION_BOOT,
 		.validate = generic_mmc_validate_fw,
 		.write = generic_mmc_write_fw,
 	},
+#endif
 	{
 		.name = "Factory",
 		.abbr = "factory",
@@ -130,6 +147,28 @@ void board_upgrade_data_parts(const struct data_part_entry **dpes, u32 *count)
 
 int board_boot_default(bool do_boot)
 {
+	if (IS_ENABLED(CONFIG_MTK_SNOR_MMC_FALLBACK_BOOT)) {
+		const char *boot_from_sd_str = env_get("boot_from_sd");
+		u64 fit_offset = CONFIG_MTK_SNOR_MMC_FALLBACK_FIT_OFFSET;
+		int ret;
+
+		printf("SNOR+MMC: boot_from_sd=%s, trying raw MMC FIT @ 0x%llx first\n",
+		       boot_from_sd_str ? boot_from_sd_str : "<unset>",
+		       fit_offset);
+
+		ret = boot_from_mmc_offset(0, 0, fit_offset, do_boot);
+		if (!ret)
+			return 0;
+
+		ret = boot_from_mmc_offset(0, 0, fit_offset, do_boot);
+		if (!ret)
+			return 0;
+
+		printf("Failed to boot from SD(%d), try to boot from flash...\n", ret);
+
+		return boot_from_mtd_partition("firmware", do_boot);
+	}
+
 	return generic_mmc_boot_image(do_boot);
 }
 
@@ -164,6 +203,12 @@ static const struct bootmenu_entry snor_emmc_bootmenu_entries[] = {
 		.desc = "Upgrade firmware",
 		.cmd = "mtkupgrade fw"
 	},
+#ifdef CONFIG_MTK_SNOR_MMC_FALLBACK_BOOT
+	{
+		.desc = "Upgrade firmware (MMC)",
+		.cmd = "mtkupgrade fw-mmc"
+	},
+#endif
 	{
 		.desc = "Upgrade ATF BL2",
 		.cmd = "mtkupgrade bl2"

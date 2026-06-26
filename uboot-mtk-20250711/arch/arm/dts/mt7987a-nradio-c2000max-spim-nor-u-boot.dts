@@ -1,0 +1,225 @@
+// SPDX-License-Identifier: GPL-2.0-or-later OR MIT
+
+/dts-v1/;
+
+#include "mt7987a.dtsi"
+#include "mt7987a-u-boot.dtsi"
+#include "mt7987-netsys-u-boot.dtsi"
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/input/input.h>
+
+/ {
+	model = "NRadio C2000 Max";
+	compatible = "nradio,c2000-max", "HCMT7987-SNSD",
+		     "mediatek,mt7987-nradio-tss512",
+		     "mediatek,mt7987a", "mediatek,mt7987";
+
+	chosen {
+		bootargs = "console=ttyS0,115200n1 loglevel=8 earlycon=uart8250,mmio32,0x11000000 pci=pcie_bus_perf root=PARTLABEL=rootfs rootwait rootfstype=squashfs,f2fs fstools_partname_fallback_scan=1";
+		stdout-path = "serial0:115200n1";
+	};
+
+	aliases {
+		serial0 = &uart0;
+		led-boot = &status_led;
+		led-failsafe = &error_led;
+		led-running = &status_led;
+		led-upgrade = &status_led;
+	};
+
+	config {
+		blink_led = "hc:red:error";
+		system_led = "hc:green:status";
+	};
+
+	bl2_verify {
+		bl2_compatible = "spim-nor";
+	};
+
+	reg_3p3v: regulator-3p3v {
+		compatible = "regulator-fixed";
+		regulator-name = "fixed-3.3V";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		regulator-boot-on;
+		regulator-always-on;
+	};
+
+	gpio-keys {
+		compatible = "gpio-keys";
+
+		reset {
+			label = "reset";
+			linux,code = <KEY_RESTART>;
+			gpios = <&pio 1 GPIO_ACTIVE_LOW>;
+			debounce-interval = <10>;
+		};
+	};
+
+	gpio-leds {
+		compatible = "gpio-leds";
+
+		status_led: status {
+			label = "hc:green:status";
+			gpios = <&pio 9 GPIO_ACTIVE_LOW>;
+			default-state = "on";
+		};
+
+		sig1_led: sig1 {
+			label = "status:blue";
+			gpios = <&pio 8 GPIO_ACTIVE_LOW>;
+			default-state = "on";
+		};
+
+		sig2_led: sig2 {
+			label = "status:green";
+			gpios = <&pio 11 GPIO_ACTIVE_LOW>;
+			default-state = "on";
+		};
+
+		sig3_led: sig3 {
+			label = "status:red";
+			gpios = <&pio 10 GPIO_ACTIVE_LOW>;
+			default-state = "on";
+		};
+
+		error_led: error {
+			label = "hc:red:error";
+			gpios = <&pio 12 GPIO_ACTIVE_LOW>;
+			default-state = "off";
+		};
+	};
+};
+
+&afe {
+	status = "disabled";
+};
+
+&eth0 {
+	status = "disabled";
+};
+
+&eth1 {
+	status = "okay";
+	pinctrl-names = "i2p5gbe-led";
+	pinctrl-0 = <&i2p5gbe_led0_pins>;
+	phy-mode = "xgmii";
+	phy-handle = <&phy15>;
+
+	phy15: ethernet-phy@15 {
+		compatible = "ethernet-phy-ieee802.3-c45";
+		reg = <15>;
+		phy-mode = "xgmii";
+	};
+};
+
+&eth2 {
+	status = "disabled";
+};
+
+&i2c0 {
+	status = "disabled";
+};
+
+&mmc0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&sd_pins_default>;
+	bus-width = <4>;
+	max-frequency = <48000000>;
+	cap-sd-highspeed;
+	vmmc-supply = <&reg_3p3v>;
+	vqmmc-supply = <&reg_3p3v>;
+	status = "okay";
+
+	card@0 {
+		compatible = "mmc-card";
+		reg = <0>;
+	};
+};
+
+&pcie0 {
+	status = "disabled";
+};
+
+&pcie1 {
+	status = "disabled";
+};
+
+&pwm {
+	status = "disabled";
+};
+
+&spi0 {
+	status = "disabled";
+};
+
+&spi1 {
+	status = "disabled";
+};
+
+&spi2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&spi2_flash_pins>;
+	#address-cells = <1>;
+	#size-cells = <0>;
+	status = "okay";
+	must_tx;
+	enhance_timing;
+	dma_ext;
+	ipm_design;
+	support_quad;
+	tick_dly = <2>;
+	sample_sel = <0>;
+
+	spi_nor@0 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "jedec,spi-nor";
+		spi-cal-enable;
+		spi-cal-mode = "read-data";
+		spi-cal-datalen = <7>;
+		spi-cal-data = /bits/ 8 <
+			0x53 0x46 0x5f 0x42 0x4f 0x4f 0x54>; /* SF_BOOT */
+		spi-cal-addrlen = <1>;
+		spi-cal-addr = /bits/ 32 <0x0>;
+		reg = <0>;
+		spi-max-frequency = <52000000>;
+		spi-tx-bus-width = <4>;
+		spi-rx-bus-width = <4>;
+
+		partition@0 {
+			label = "BL2";
+			reg = <0x0 0x40000>;
+			read-only;
+		};
+
+		partition@40000 {
+			label = "u-boot-env";
+			reg = <0x40000 0x10000>;
+		};
+
+		partition@50000 {
+			label = "Factory";
+			reg = <0x50000 0x100000>;
+		};
+
+		partition@150000 {
+			label = "bdinfo";
+			reg = <0x150000 0x80000>;
+		};
+
+		partition@1d0000 {
+			label = "FIP";
+			reg = <0x1d0000 0x100000>;
+		};
+
+		partition@2d0000 {
+			label = "firmware";
+			reg = <0x2d0000 0x1d30000>;
+		};
+	};
+};
+
+&xhci {
+	status = "disabled";
+};

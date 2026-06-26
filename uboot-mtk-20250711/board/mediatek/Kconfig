@@ -103,6 +103,23 @@ config MTK_BOOTMENU_SNOR_EMMC
 
 endchoice
 
+config MTK_SNOR_MMC_FALLBACK_BOOT
+	bool "Try MMC firmware before SPI-NOR on SNOR+MMC boards"
+	depends on MTK_BOOTMENU_SNOR_EMMC
+	help
+	  Try booting firmware from MMC first. If that fails, fall back to
+	  the firmware partition in SPI-NOR. This matches boards which keep
+	  the bootloader in SPI-NOR but prefer booting the system from SD.
+
+config MTK_SNOR_MMC_FALLBACK_FIT_OFFSET
+	hex "MMC FIT image offset for SNOR+MMC fallback boot"
+	depends on MTK_SNOR_MMC_FALLBACK_BOOT
+	default 0x0
+	help
+	  Raw offset of the FIT image in MMC used by SNOR+MMC fallback boot.
+	  Boards with a vendor-defined SD layout can set this to match the
+	  firmware location used by the original bootloader.
+
 config MTK_MMC_BOOT_BUS_WIDTH_1B
 	bool
 	default y if TARGET_MT7622
