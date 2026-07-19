@@ -16,6 +16,7 @@
 	};
 
 	config {
+		/delete-property/ u-boot,mmc-env-partition;
 		bootcmd = "mtkboardboot";
 		blink_led = "amber:system";
 		system_led = "amber:system";
@@ -113,6 +114,10 @@
 
 &uart0 {
 	status = "okay";
+};
+
+&mmc0 {
+	status = "disabled";
 };
 
 &eth {
