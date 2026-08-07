@@ -198,6 +198,27 @@ for cfg_file in $CONFIG_LIST; do
     mkdir -p "$ATF_DIR/build"
     cp -f "$cfg_file" "$ATF_DIR/build/.config"
 
+    # Convert NAND_TYPE string to Kconfig boolean symbol so olddefconfig preserves it.
+    # Without this, NAND_TYPE="spim:4k+256" in .config is silently dropped by
+    # olddefconfig and defaults to _NAND_TYPE_2K_64 (2k+64), producing a BL2 that
+    # cannot read 4k+256 page NAND chips (e.g. 512MB Toshiba TC58CVG2S0HRAIJ).
+    nand_type_val=$(grep -oP '^NAND_TYPE="\K[^"]+' "$ATF_DIR/build/.config" 2>/dev/null || true)
+    if [ -n "$nand_type_val" ]; then
+        case "$nand_type_val" in
+            *4k+256)  nand_type_sym="_NAND_TYPE_4K_256=y" ;;
+            *2k+128)  nand_type_sym="_NAND_TYPE_2K_128=y" ;;
+            *2k+120)  nand_type_sym="_NAND_TYPE_2K_120=y" ;;
+            *2k+64)   nand_type_sym="_NAND_TYPE_2K_64=y" ;;
+            *)        nand_type_sym="" ;;
+        esac
+        if [ -n "$nand_type_sym" ]; then
+            sed -i '/^_NAND_TYPE_/d' "$ATF_DIR/build/.config"
+            append_unique_line "$nand_type_sym" "$ATF_DIR/build/.config"
+        fi
+        # Remove the NAND_TYPE string line; olddefconfig will regenerate it from the boolean
+        sed -i '/^NAND_TYPE=/d' "$ATF_DIR/build/.config"
+    fi
+
     # Extra options only apply to configs under normal/.
     is_normal_cfg=0
     case "$cfg_rel" in
