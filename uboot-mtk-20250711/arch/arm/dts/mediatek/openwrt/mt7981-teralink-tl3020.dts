@@ -9,7 +9,7 @@
 	#address-cells = <1>;
 	#size-cells = <1>;
 	model = "Teralink TL3020 256mb";
-	compatible = "mediatek,mt7981", "mediatek,mt7981-rfb";
+	compatible = "teralink,tl3020-256mb", "mediatek,mt7981";
 
 	chosen {
 		stdout-path = &uart0;
@@ -40,12 +40,12 @@
 	gpio-leds {
 		compatible = "gpio-leds";
 
-		upgrade_led: led-red-wan {
+		led-wan-red {
 			label = "red:wan";
-			gpios = <&pio 6 GPIO_ACTIVE_LOW>;
+			gpios = <&pio 6 GPIO_ACTIVE_HIGH>;
 		};
 
-		boot_led: led-power {
+		led-power {
 			label = "blue:power";
 			gpios = <&pio 7 GPIO_ACTIVE_LOW>;
 		};
@@ -65,12 +65,12 @@
 			gpios = <&pio 11 GPIO_ACTIVE_LOW>;
 		};
 
-		led-blue-wan {
+		led-wan-blue {
 			label = "blue:wan";
 			gpios = <&pio 12 GPIO_ACTIVE_LOW>;
 		};
 
-		running_led: led-wlan2g {
+		led-wlan2g {
 			label = "blue:wlan2g";
 			gpios = <&pio 34 GPIO_ACTIVE_LOW>;
 		};
@@ -167,7 +167,7 @@
 
 			partition@680000 {
 				label = "ubi";
-				reg = <0x680000 0xe540000>;
+				reg = <0x680000 0xf980000>;
 				compatible = "linux,ubi";
 			};
 		};
