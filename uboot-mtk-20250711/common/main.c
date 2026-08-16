@@ -27,9 +27,7 @@
 #include <net.h>
 #include <version_string.h>
 #include <efi_loader.h>
-#ifdef CONFIG_MTK_NET_ABORT
 #include <net_abort.h>
-#endif
 
 static void run_preboot_environment_command(void)
 {
