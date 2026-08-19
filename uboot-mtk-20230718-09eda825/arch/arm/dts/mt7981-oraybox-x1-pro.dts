@@ -22,6 +22,7 @@
 		system_led = "red:power";
 	};
 
+	mtd-layout {
 		layout@0 {
 			label = "default";
 			// mtd layout for immortalwrt/openwrt 112M ubi firmware
