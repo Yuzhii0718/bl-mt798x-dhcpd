@@ -3,12 +3,11 @@
 /dts-v1/;
 #include "mt7981.dtsi"
 #include <dt-bindings/gpio/gpio.h>
-#include <dt-bindings/input/linux-event-codes.h>
 
 / {
 	#address-cells = <1>;
 	#size-cells = <1>;
-	model = "cudy_tr3000-v1";
+    model = "Oray X1 Pro";
 	compatible = "mediatek,mt7981", "mediatek,mt7981-rfb";
 
 	chosen {
@@ -25,38 +24,42 @@
 	mtd-layout {
 		layout@0 {
 			label = "default";
+			// mtd layout for immortalwrt/openwrt 112M ubi firmware
 			mtdids = "nmbm0=nmbm0";
-			mtdparts = "nmbm0:1024k(bl2),512k(u-boot-env),2048k(Factory),256k(bdinfo),2048k(fip),65536k(ubi)";
+			mtdparts = "nmbm0:1024k(bl2),512k(u-boot-env),2048k(Factory),2048k(fip),512k(bdinfo),2048k(kpanic),114688k(ubi)";
 		};
 
 		layout@1 {
-			label = "112m";
+			label = "oray-256m-228m";
 			mtdids = "nmbm0=nmbm0";
-			mtdparts = "nmbm0:1024k(bl2),512k(u-boot-env),2048k(Factory),256k(bdinfo),2048k(fip),114688k(ubi)";
+			mtdparts = "nmbm0:1024k(bl2),512k(u-boot-env),2048k(factory),2048k(fip),512k(bdinfo),2048k(kpanic),233472k(ubi)";
 		};
 
 		layout@2 {
-			label = "114m";
+			label = "oray-512m-488m";
 			mtdids = "nmbm0=nmbm0";
-			mtdparts = "nmbm0:1024k(bl2),512k(u-boot-env),2048k(factory),256k(bdinfo),2048k(fip),116736k(ubi)";
+			mtdparts = "nmbm0:1024k(bl2),512k(u-boot-env),2048k(factory),2048k(fip),512k(bdinfo),2048k(kpanic),499712k(ubi)";
 		};
-	
-		layout@3 {
-			label = "256m-230m";
-			mtdids = "nmbm0=nmbm0";
-			mtdparts = "nmbm0:1024k(bl2),512k(u-boot-env),2048k(factory),256k(bdinfo),2048k(fip),235520k(ubi)";
-		};
-		
-		layout@4 {
-			label = "512m-490m";
-			mtdids = "nmbm0=nmbm0";
-			mtdparts = "nmbm0:1024k(bl2),512k(u-boot-env),2048k(factory),256k(bdinfo),2048k(fip),501760k(ubi)";
-		};
-	};
 
-	memory@40000000 {
-		device_type = "memory";
-		reg = <0x40000000 0x20000000>;
+		layout@3 {
+			label = "oray-ubi0";
+			mtdids = "nmbm0=nmbm0";
+			mtdparts = "nmbm0:1024k(bl2),512k(u-boot-env),2048k(Factory),2048k(fip),512k(bdinfo),2048k(kpanic),57344k(ubi_0),57344k(ubi_1)";
+			boot_part = "ubi_0";
+			factory_part = "ubi_0";
+			sysupgrade_kernel_ubipart = "ubi_0";
+			sysupgrade_rootfs_ubipart = "ubi_0";
+		};
+
+		layout@4 {
+			label = "oray-ubi1";
+			mtdids = "nmbm0=nmbm0";
+			mtdparts = "nmbm0:1024k(bl2),512k(u-boot-env),2048k(Factory),2048k(fip),512k(bdinfo),2048k(kpanic),57344k(ubi_0),57344k(ubi_1)";
+			boot_part = "ubi_1";
+			factory_part = "ubi_1";
+			sysupgrade_kernel_ubipart = "ubi_1";
+			sysupgrade_rootfs_ubipart = "ubi_1";
+		};
 	};
 
 	gpio-keys {
@@ -64,15 +67,12 @@
 
 		button-reset {
 			label = "reset";
-			linux,code = <KEY_RESTART>;
-			gpios = <&pio 1 GPIO_ACTIVE_LOW>;
+			gpios = <&gpio 1 GPIO_ACTIVE_LOW>;
 		};
 
 		button-mode {
 			label = "mode";
-			linux,code = <EV_SW>;
-			linux,input-type = <BTN_0>;
-			gpios = <&pio 0 GPIO_ACTIVE_HIGH>;
+			gpios = <&gpio 0 GPIO_ACTIVE_HIGH>;
 			debounce-interval = <60>;
 		};
 	};
@@ -82,17 +82,13 @@
 
 		led_status: led-0 {
 			label = "red:power";
-			gpios = <&pio 11 GPIO_ACTIVE_LOW>;
+			gpios = <&gpio 11 GPIO_ACTIVE_LOW>;
 		};
 
 		led-1 {
 			label = "white:status";
-			gpios = <&pio 10 GPIO_ACTIVE_LOW>;
+			gpios = <&gpio 10 GPIO_ACTIVE_LOW>;
 		};
-	};
-
-	bl2_verify {
-		bl2_compatible = "spim-nand";
 	};
 };
 
@@ -111,7 +107,7 @@
 	};
 };
 
-&pio {
+&pinctrl {
 	spi_flash_pins: spi0-pins-func-1 {
 		mux {
 			function = "flash";
@@ -120,13 +116,13 @@
 
 		conf-pu {
 			pins = "SPI0_CS", "SPI0_HOLD", "SPI0_WP";
-			drive-strength = <MTK_DRIVE_4mA>;
+			drive-strength = <MTK_DRIVE_8mA>;
 			bias-pull-up = <MTK_PUPD_SET_R1R0_11>;
 		};
 
 		conf-pd {
 			pins = "SPI0_CLK", "SPI0_MOSI", "SPI0_MISO";
-			drive-strength = <MTK_DRIVE_4mA>;
+			drive-strength = <MTK_DRIVE_8mA>;
 			bias-pull-down = <MTK_PUPD_SET_R1R0_11>;
 		};
 	};

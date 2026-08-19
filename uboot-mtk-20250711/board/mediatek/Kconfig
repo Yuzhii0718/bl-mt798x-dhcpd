@@ -103,23 +103,6 @@ config MTK_BOOTMENU_SNOR_EMMC
 
 endchoice
 
-config MTK_SNOR_MMC_FALLBACK_BOOT
-	bool "Try MMC firmware before SPI-NOR on SNOR+MMC boards"
-	depends on MTK_BOOTMENU_SNOR_EMMC
-	help
-	  Try booting firmware from MMC first. If that fails, fall back to
-	  the firmware partition in SPI-NOR. This matches boards which keep
-	  the bootloader in SPI-NOR but prefer booting the system from SD.
-
-config MTK_SNOR_MMC_FALLBACK_FIT_OFFSET
-	hex "MMC FIT image offset for SNOR+MMC fallback boot"
-	depends on MTK_SNOR_MMC_FALLBACK_BOOT
-	default 0x0
-	help
-	  Raw offset of the FIT image in MMC used by SNOR+MMC fallback boot.
-	  Boards with a vendor-defined SD layout can set this to match the
-	  firmware location used by the original bootloader.
-
 config MTK_MMC_BOOT_BUS_WIDTH_1B
 	bool
 	default y if TARGET_MT7622
@@ -238,18 +221,6 @@ config MTK_UBI_FIP_MIN_SIZE
 	  fip upgrading failure due to no enough space caused by rootfs_data
 	  used out all free space.
 
-config MTK_UBI_BL2_IN_MTD_PART
-	bool "Store BL2 in a dedicated MTD partition"
-	depends on MTK_BOOTMENU_UBI
-	depends on ARCH_MEDIATEK
-	help
-	  Enable this option to store/upgrade BL2 in a raw MTD partition named
-	  "bl2" instead of upgrade by redundant copies in slot. This is useful
-	  when the MTD layout is legacy.
-
-	  When enabled, make sure mtdparts includes a "bl2" partition. and the
-	  BL2 redundant copy mechanism is not required.
-
 config MTK_UBI_FIP_IN_MTD_PART
 	bool "Store FIP in a dedicated MTD partition"
 	depends on MTK_BOOTMENU_UBI
@@ -268,28 +239,6 @@ config MTK_UBI_RF_IN_MTD_PART
 	help
 	  Enable this option to store/upgrade factory in a raw MTD partition
 	  named "factory" instead of a UBI volume.
-
-config MTK_RF_PART_AUTO
-	bool "Use auto detection for factory (RF calibration) partition"
-	default y
-	help
-	  When enabled, the bootmenu will auto-detect the factory/RF calibration
-	  partition by first trying "factory", then falling back to "Factory".
-	  This is the default behavior for standard devices.
-
-	  When disabled, you can specify a custom partition name for devices
-	  that use non-standard naming (e.g. "RF", "Factory", "rf_data").
-
-config MTK_RF_PART_CUSTOM
-	string "Custom factory (RF calibration) partition name"
-	depends on !MTK_RF_PART_AUTO
-	default "factory"
-	help
-	  When auto detection is disabled, this custom partition name will be
-	  used for reading/writing the wireless calibration data.
-
-	  Set this to match the actual partition/volume name on your device
-	  (e.g. "RF", "art", "eeprom", "rf_data").
 
 config MTK_DUAL_BOOT_EMERG_IMAGE_UPGRADE
 	bool "Enable upgrading emergency image (Debug only)"
@@ -325,44 +274,6 @@ config MEDIATEK_MULTI_MTD_LAYOUT
 	depends on !MTK_BOOTMENU_MMC
 	depends on !MTK_DUAL_BOOT
 	default n
-
-config MEDIATEK_MTD_LAYOUT_PRINT
-	bool "Print mtd layout information during boot"
-	depends on MEDIATEK_MULTI_MTD_LAYOUT
-	default n
-
-config MTD_LAYOUT_SPI_NAND
-	bool "Replace nmbm0 with spi-nand0 in MTD layout"
-	depends on MEDIATEK_MULTI_MTD_LAYOUT
-	default n
-	help
-	  When enabled, the flash device name "nmbm0" in mtdids and
-	  mtdparts strings read from the device tree mtd-layout node
-	  will be replaced with "spi-nand0" at runtime. This allows
-	  the same device tree to be used for both NMBM and non-NMBM
-	  builds without maintaining separate DTS files.
-
-	  Enable this for non-NMBM builds where the raw flash device
-	  is named "spi-nand0" instead of "nmbm0".
-
-config MTK_FDT_BOOTARGS_FALLBACK
-	bool "Preserve existing bootargs when mtd-layout cmdline is missing"
-	depends on MEDIATEK_MULTI_MTD_LAYOUT
-	default n
-	help
-	  When enabled, the mtd-layout processing will only overwrite the
-	  bootargs environment variable if the current layout explicitly
-	  defines a cmdline property. If cmdline is absent, the existing
-	  bootargs (e.g. from the official firmware FDT) are preserved.
-
-	  Additionally, board_fdt_chosen_bootargs() will fall back to the
-	  bootargs already present in the target FDT when the environment
-	  bootargs is empty, ensuring the kernel always receives valid
-	  boot arguments.
-
-	  Enable this for devices that boot official firmware whose FDT
-	  does not contain NMBM properties or whose mtd-layout default
-	  entry lacks a cmdline.
 
 config MTD_VERIFY_FDT
 	bool "Enable mtd device boot Linux FDT verification"
@@ -540,7 +451,7 @@ config MTK_DUAL_BOOT_ROOTFS_DATA_SIZE_LIMIT
 
 config MTK_DUAL_BOOT_ROOTFS_DATA_SIZE
 	int "Size of rootfs_data volume (MiB)"
-	range 1 128
+	range 1 1024
 	default 8
 	depends on MTK_DUAL_BOOT_ROOTFS_DATA_SIZE_LIMIT || !MTK_DUAL_BOOT_ITB_IMAGE || !MTK_DUAL_BOOT_SHARED_ROOTFS_DATA
 
