@@ -3,12 +3,11 @@
 /dts-v1/;
 #include "mt7981.dtsi"
 #include <dt-bindings/gpio/gpio.h>
-#include <dt-bindings/input/linux-event-codes.h>
 
 / {
 	#address-cells = <1>;
 	#size-cells = <1>;
-	model = "oraybox_x1-pro";
+	model = "oray_x1-pro";
 	compatible = "mediatek,mt7981", "mediatek,mt7981-rfb";
 
 	chosen {
@@ -63,24 +62,16 @@
 		};
 	};
 
-	memory@40000000 {
-		device_type = "memory";
-		reg = <0x40000000 0x20000000>;
-	};
-
 	gpio-keys {
 		compatible = "gpio-keys";
 
 		button-reset {
 			label = "reset";
-			linux,code = <KEY_RESTART>;
 			gpios = <&gpio 1 GPIO_ACTIVE_LOW>;
 		};
 
 		button-mode {
 			label = "mode";
-			linux,code = <EV_SW>;
-			linux,input-type = <BTN_0>;
 			gpios = <&gpio 0 GPIO_ACTIVE_HIGH>;
 			debounce-interval = <60>;
 		};
@@ -98,10 +89,6 @@
 			label = "white:status";
 			gpios = <&gpio 10 GPIO_ACTIVE_LOW>;
 		};
-	};
-
-	bl2_verify {
-		bl2_compatible = "spim-nand";
 	};
 };
 

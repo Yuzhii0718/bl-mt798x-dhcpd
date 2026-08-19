@@ -8,7 +8,7 @@
 / {
 	#address-cells = <1>;
 	#size-cells = <1>;
-	model = "oraybox_x1-pro";
+	model = "oray_x1-pro";
 	compatible = "mediatek,mt7981", "mediatek,mt7981-rfb";
 
 	chosen {
