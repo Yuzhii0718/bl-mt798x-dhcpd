@@ -30,13 +30,13 @@
 		};
 
 		layout@1 {
-			label = "x1pro-256m-228m";
+			label = "oray-256m-228m";
 			mtdids = "nmbm0=nmbm0";
 			mtdparts = "nmbm0:1024k(bl2),512k(u-boot-env),2048k(factory),2048k(fip),512k(bdinfo),2048k(kpanic),233472k(ubi)";
 		};
 
 		layout@2 {
-			label = "x1pro-512m-488m";
+			label = "oray-512m-488m";
 			mtdids = "nmbm0=nmbm0";
 			mtdparts = "nmbm0:1024k(bl2),512k(u-boot-env),2048k(factory),2048k(fip),512k(bdinfo),2048k(kpanic),499712k(ubi)";
 		};
