@@ -5,7 +5,7 @@ console=earlycon=uart8250,mmio32,0x11002000 console=ttyS0
 bootcmd=if pstore check ; then run boot_recovery ; else run boot_ubi ; fi
 bootconf=config-1
 bootdelay=0
-bootfile=openwrt-mediatek-filogic-cudy_tr3000-v1-ubootmod-initramfs-recovery.itb
+bootfile=openwrt-mediatek-filogic-oraybox_x1-pro-ubootmod-initramfs-recovery.itb
 bootfile_bl2=openwrt-mediatek-filogic-oraybox_x1-pro-ubootmod-preloader.bin
 bootfile_fip=openwrt-mediatek-filogic-oraybox_x1-pro-ubootmod-bl31-uboot.fip
 bootfile_upg=openwrt-mediatek-filogic-oraybox_x1-pro-ubootmod-squashfs-sysupgrade.itb
