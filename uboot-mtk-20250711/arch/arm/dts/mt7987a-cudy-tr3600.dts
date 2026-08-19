@@ -1,0 +1,61 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+
+/dts-v1/;
+#include "mt7987a.dtsi"
+#include "mt7987-spim-nand.dtsi"
+#include <dt-bindings/input/input.h>
+
+/*
+ * Flash partitions are not described here. The -u-boot.dtsi is appended after
+ * this file and deletes flash@0 wholesale, so any partitions node defined here
+ * would never reach the built DTB. U-Boot takes its layout from
+ * CONFIG_MTDPARTS_DEFAULT instead; the stock bootloader does the same.
+ */
+
+/ {
+	model = "Cudy TR3600";
+	/* Keep the stock prefixes so FIP compatibility checks can upgrade safely. */
+	compatible = "mediatek,mt7987", "mediatek,mt7987-spim-nand-rfb",
+		     "cudy,tr3600";
+
+	memory {
+		device_type = "memory";
+		reg = <0 0x40000000 0 0x20000000>;
+	};
+
+	chosen {
+		bootargs = "console=ttyS0,115200n1 loglevel=8 earlycon=uart8250,mmio32,0x11000000 pci=pcie_bus_perf ubi.block=0,firmware root=/dev/fit0 rootwait";
+	};
+
+	gpio-keys {
+		compatible = "gpio-keys";
+
+		reset {
+			label = "reset";
+			linux,code = <KEY_RESTART>;
+			gpios = <&pio 1 GPIO_ACTIVE_LOW>;
+			debounce-interval = <10>;
+		};
+
+		wps {
+			label = "wps";
+			linux,code = <KEY_WPS_BUTTON>;
+			gpios = <&pio 0 GPIO_ACTIVE_LOW>;
+			debounce-interval = <10>;
+		};
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		led-blue {
+			label = "oem:green:blue";
+			gpios = <&pio 48 GPIO_ACTIVE_LOW>;
+		};
+
+		led-red {
+			label = "oem:green:red";
+			gpios = <&pio 46 GPIO_ACTIVE_LOW>;
+		};
+	};
+};

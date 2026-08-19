@@ -8,7 +8,7 @@
 / {
 	#address-cells = <1>;
 	#size-cells = <1>;
-	model = "cudy_tr3000-v1";
+	model = "oraybox_x1-pro";
 	compatible = "mediatek,mt7981", "mediatek,mt7981-rfb";
 
 	chosen {
@@ -22,35 +22,43 @@
 		system_led = "red:power";
 	};
 
-	mtd-layout {
 		layout@0 {
 			label = "default";
+			// mtd layout for immortalwrt/openwrt 112M ubi firmware
 			mtdids = "nmbm0=nmbm0";
-			mtdparts = "nmbm0:1024k(bl2),512k(u-boot-env),2048k(Factory),256k(bdinfo),2048k(fip),65536k(ubi)";
+			mtdparts = "nmbm0:1024k(bl2),512k(u-boot-env),2048k(Factory),2048k(fip),512k(bdinfo),2048k(kpanic),114688k(ubi)";
 		};
 
 		layout@1 {
-			label = "112m";
+			label = "oray-256m-228m";
 			mtdids = "nmbm0=nmbm0";
-			mtdparts = "nmbm0:1024k(bl2),512k(u-boot-env),2048k(Factory),256k(bdinfo),2048k(fip),114688k(ubi)";
+			mtdparts = "nmbm0:1024k(bl2),512k(u-boot-env),2048k(factory),2048k(fip),512k(bdinfo),2048k(kpanic),233472k(ubi)";
 		};
 
 		layout@2 {
-			label = "114m";
+			label = "oray-512m-488m";
 			mtdids = "nmbm0=nmbm0";
-			mtdparts = "nmbm0:1024k(bl2),512k(u-boot-env),2048k(factory),256k(bdinfo),2048k(fip),116736k(ubi)";
+			mtdparts = "nmbm0:1024k(bl2),512k(u-boot-env),2048k(factory),2048k(fip),512k(bdinfo),2048k(kpanic),499712k(ubi)";
 		};
-	
+
 		layout@3 {
-			label = "256m-230m";
+			label = "oray-ubi0";
 			mtdids = "nmbm0=nmbm0";
-			mtdparts = "nmbm0:1024k(bl2),512k(u-boot-env),2048k(factory),256k(bdinfo),2048k(fip),235520k(ubi)";
+			mtdparts = "nmbm0:1024k(bl2),512k(u-boot-env),2048k(Factory),2048k(fip),512k(bdinfo),2048k(kpanic),57344k(ubi_0),57344k(ubi_1)";
+			boot_part = "ubi_0";
+			factory_part = "ubi_0";
+			sysupgrade_kernel_ubipart = "ubi_0";
+			sysupgrade_rootfs_ubipart = "ubi_0";
 		};
-		
+
 		layout@4 {
-			label = "512m-490m";
+			label = "oray-ubi1";
 			mtdids = "nmbm0=nmbm0";
-			mtdparts = "nmbm0:1024k(bl2),512k(u-boot-env),2048k(factory),256k(bdinfo),2048k(fip),501760k(ubi)";
+			mtdparts = "nmbm0:1024k(bl2),512k(u-boot-env),2048k(Factory),2048k(fip),512k(bdinfo),2048k(kpanic),57344k(ubi_0),57344k(ubi_1)";
+			boot_part = "ubi_1";
+			factory_part = "ubi_1";
+			sysupgrade_kernel_ubipart = "ubi_1";
+			sysupgrade_rootfs_ubipart = "ubi_1";
 		};
 	};
 

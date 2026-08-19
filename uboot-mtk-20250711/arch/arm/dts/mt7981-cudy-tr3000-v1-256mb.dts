@@ -8,7 +8,7 @@
 / {
 	#address-cells = <1>;
 	#size-cells = <1>;
-	model = "cudy_tr3000-v1";
+	model = "cudy_tr3000-v1-256mb";
 	compatible = "mediatek,mt7981", "mediatek,mt7981-rfb";
 
 	chosen {
@@ -20,38 +20,6 @@
 		bootcmd = "mtkboardboot";
 		blink_led = "white:status";
 		system_led = "red:power";
-	};
-
-	mtd-layout {
-		layout@0 {
-			label = "default";
-			mtdids = "nmbm0=nmbm0";
-			mtdparts = "nmbm0:1024k(bl2),512k(u-boot-env),2048k(Factory),256k(bdinfo),2048k(fip),65536k(ubi)";
-		};
-
-		layout@1 {
-			label = "112m";
-			mtdids = "nmbm0=nmbm0";
-			mtdparts = "nmbm0:1024k(bl2),512k(u-boot-env),2048k(Factory),256k(bdinfo),2048k(fip),114688k(ubi)";
-		};
-
-		layout@2 {
-			label = "114m";
-			mtdids = "nmbm0=nmbm0";
-			mtdparts = "nmbm0:1024k(bl2),512k(u-boot-env),2048k(factory),256k(bdinfo),2048k(fip),116736k(ubi)";
-		};
-	
-		layout@3 {
-			label = "256m-230m";
-			mtdids = "nmbm0=nmbm0";
-			mtdparts = "nmbm0:1024k(bl2),512k(u-boot-env),2048k(factory),256k(bdinfo),2048k(fip),235520k(ubi)";
-		};
-		
-		layout@4 {
-			label = "512m-490m";
-			mtdids = "nmbm0=nmbm0";
-			mtdparts = "nmbm0:1024k(bl2),512k(u-boot-env),2048k(factory),256k(bdinfo),2048k(fip),501760k(ubi)";
-		};
 	};
 
 	memory@40000000 {
