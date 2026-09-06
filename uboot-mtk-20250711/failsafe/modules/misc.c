@@ -352,6 +352,42 @@ struct reboot_session {
 	bool do_reboot;
 };
 
+/*
+ * Set once a /reboot or /reboot-failsafe request has been answered and its
+ * connection has been fully closed.  The reset itself is performed by
+ * do_httpd() after the poll loop has exited.
+ *
+ * Calling do_reset() here would run it -- and mtk_tcp_close_all_conn() --
+ * from inside the TCP callback, i.e. inside the eth_rx() → connection
+ * teardown chain.  The teardown of the very connection running this
+ * callback then re-entered the callback, which recursed until the stack
+ * blew up, printing its "Rebooting now" line over and over without ever
+ * reaching do_reset().
+ */
+bool reboot_pending;
+
+/*
+ * Consume the reboot session of a closed connection.
+ *
+ * session_data is detached before it is freed: the connection teardown
+ * path can deliver HTTP_CB_CLOSED more than once for the same session,
+ * and reading or freeing an already released session turned the reboot
+ * into an unbounded recursion.
+ */
+static bool reboot_session_take(struct httpd_response *response)
+{
+	struct reboot_session *st = response->session_data;
+	bool do_reboot = false;
+
+	if (st) {
+		do_reboot = st->do_reboot;
+		response->session_data = NULL;
+		free(st);
+	}
+
+	return do_reboot;
+}
+
 void reboot_handler(enum httpd_uri_handler_status status,
 			   struct httpd_request *request,
 			   struct httpd_response *response)
@@ -378,18 +414,13 @@ void reboot_handler(enum httpd_uri_handler_status status,
 	}
 
 	if (status == HTTP_CB_CLOSED) {
-		bool do_reboot = false;
-
-		st = response->session_data;
-		if (st)
-			do_reboot = st->do_reboot;
-		free(st);
-
-		if (do_reboot) {
-			/* Make sure the current HTTP session has fully closed before reset */
-			mtk_tcp_close_all_conn();
-			do_reset(NULL, 0, 0, NULL);
-		}
+		/*
+		 * Only record the request.  do_httpd() performs the reset
+		 * after the poll loop has exited and the network has been
+		 * halted, i.e. safely outside the TCP callback chain.
+		 */
+		if (reboot_session_take(response))
+			reboot_pending = true;
 	}
 }
 
@@ -433,17 +464,8 @@ void reboot_failsafe_handler(enum httpd_uri_handler_status status,
 	}
 
 	if (status == HTTP_CB_CLOSED) {
-		bool do_reboot = false;
-
-		st = response->session_data;
-		if (st)
-			do_reboot = st->do_reboot;
-		free(st);
-
-		if (do_reboot) {
-			mtk_tcp_close_all_conn();
-			do_reset(NULL, 0, 0, NULL);
-		}
+		if (reboot_session_take(response))
+			reboot_pending = true;
 	}
 }
 

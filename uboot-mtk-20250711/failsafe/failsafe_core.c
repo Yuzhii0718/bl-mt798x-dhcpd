@@ -57,6 +57,7 @@ extern u32 upload_data_id;
 extern const void *upload_data;
 extern size_t upload_size;
 extern bool auto_action_pending;
+extern bool reboot_pending;
 extern failsafe_fw_t fw_type;
 
 /* ------------------------------------------------------------------ */
@@ -207,6 +208,12 @@ int start_web_failsafe(void)
 	 *   - Ctrl+C is pressed, or
 	 *   - all TCP listeners and connections are gone (mtk_tcp_done_flag).
 	 *   - an auto-action (initramfs boot / firmware flash) is pending.
+	 *   - a /reboot request has been completed (reboot_pending).
+	 *
+	 * The reboot is deliberately deferred to this level as well: the
+	 * handler only records the request from within the TCP callback,
+	 * and do_httpd() runs do_reset() here, outside the eth_rx() →
+	 * callback chain.
 	 *
 	 * When telnetd runs a network command (tftp, ping, …) the inner
 	 * net_loop() calls eth_halt() on exit.  telnetd sets the
@@ -218,7 +225,8 @@ int start_web_failsafe(void)
 	 * re-register the DHCP handler that net_clear_handlers() removed.
 	 */
 	printf("[FAILSAFE] entering poll loop, done_flag=%d\n", mtk_tcp_done_flag);
-	while (!ctrlc() && !mtk_tcp_done_flag && !auto_action_pending) {
+	while (!ctrlc() && !mtk_tcp_done_flag && !auto_action_pending &&
+	       !reboot_pending) {
 #if defined(CONFIG_MTK_TELNETD)
 		/*
 		 * Run a queued telnet command at poll-loop level, OUTSIDE the
@@ -338,6 +346,14 @@ static int do_httpd(struct cmd_tbl *cmdtp, int flag, int argc,
 			boot_from_mem((ulong)upload_data);
 		else
 			do_reset(NULL, 0, 0, NULL);
+	} else if (reboot_pending) {
+		/*
+		 * /reboot was answered and its connection is gone; the
+		 * network has been halted by start_web_failsafe(), so it is
+		 * safe to reset now.
+		 */
+		printf("NOTICE: Rebooting now...\n");
+		do_reset(NULL, 0, 0, NULL);
 	}
 
 	return ret;
