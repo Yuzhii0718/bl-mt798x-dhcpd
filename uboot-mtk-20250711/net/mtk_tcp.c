@@ -109,6 +109,8 @@ static int mtk_tcp_send_packet_opt(struct mtk_tcp_conn *c, u16 flags, u32 seq, u
 static int mtk_tcp_send_packet(struct mtk_tcp_conn *c, u16 flags, u32 seq, u32 ack,
 			   const void *payload, int payload_len);
 static int mtk_tcp_send_packet_ctrl(struct mtk_tcp_conn *c, u16 flags);
+static void mtk_tcp_conn_finish(struct mtk_tcp_conn *c,
+				enum mtk_tcp_cb_status status);
 
 static LIST_HEAD(listen_head);
 static LIST_HEAD(conn_head);
@@ -616,9 +618,8 @@ bool mtk_receive_tcp(struct ip_hdr *ip, int len, struct ethernet_hdr *et)
 			    &c->ip_remote, ntohs(c->port_remote), c->status);
 		if (c->status != SYN_RCVD) {
 			/* The peer has reset the connection */
-			cbd.status = MTK_TCP_CB_REMOTE_CLOSED;
-			assert((size_t)c->cb > gd->ram_base);
-			c->cb(&cbd);
+			mtk_tcp_conn_finish(c, MTK_TCP_CB_REMOTE_CLOSED);
+			return true;
 		}
 
 		mtk_tcp_conn_del(c);
@@ -798,10 +799,7 @@ bool mtk_receive_tcp(struct ip_hdr *ip, int len, struct ethernet_hdr *et)
 		mtk_tcp_log("[MTK_TCP] rx: LAST_ACK done for %pI4:%d, -> CLOSED\n",
 			    &c->ip_remote, ntohs(c->port_remote));
 		c->status = CLOSE_WAIT;
-		cbd.status = MTK_TCP_CB_REMOTE_CLOSED;
-		assert((size_t)c->cb > gd->ram_base);
-		c->cb(&cbd);
-		mtk_tcp_conn_del(c);
+		mtk_tcp_conn_finish(c, MTK_TCP_CB_REMOTE_CLOSED);
 		break;
 	case FIN_WAIT_1:
 		if (flags & MTK_TCP_ACK) {
@@ -877,6 +875,8 @@ static int mtk_tcp_rexmit_check(struct mtk_tcp_conn *c, struct mtk_tcp_cb_data *
 			c->cb(cbd);
 			break;
 		case FIN_WAIT_1:
+		case FIN_WAIT_2:
+		case CLOSING:
 		case CLOSE_WAIT:
 			cbd->status = MTK_TCP_CB_CLOSED;
 			assert((size_t)c->cb > gd->ram_base);
@@ -1171,14 +1171,30 @@ static void mtk_tcp_conn_check(struct mtk_tcp_conn *c)
 		}
 
 		break;
+	case FIN_WAIT_2:
+	case CLOSING:
+		/*
+		 * Half-closed, waiting for the last ACK/FIN of the peer.
+		 * Nothing is retransmitted in these states, but the
+		 * connection must not stay here forever when the peer never
+		 * answers: upper layers wait for MTK_TCP_CB_CLOSED before
+		 * acting (the web failsafe reboot, for one), and
+		 * mtk_tcp_periodic_check() only reports "done" once every
+		 * connection is gone.
+		 */
+		switch (mtk_tcp_rexmit_check(c, &cbd)) {
+		case -1:
+			return;
+		default:
+			break;
+		}
+
+		break;
 	case TIME_WAIT:
 		mtk_tcp_log("[MTK_TCP] conn_check: %pI4:%d TIME_WAIT -> CLOSED\n",
 			    &c->ip_remote, ntohs(c->port_remote));
 		mtk_tcp_send_packet_ctrl(c, MTK_TCP_ACK);
-		cbd.status = MTK_TCP_CB_CLOSED;
-		assert((size_t)c->cb > gd->ram_base);
-		c->cb(&cbd);
-		mtk_tcp_conn_del(c);
+		mtk_tcp_conn_finish(c, MTK_TCP_CB_CLOSED);
 		break;
 	default:
 		return;
@@ -1382,6 +1398,49 @@ int mtk_tcp_send_data(const void *conn, const void *data, u32 size)
 }
 
 /*
+ * Deliver the final notification for @c and release it.
+ *
+ * The connection is unlinked from conn_head and stripped of its callback
+ * and private data BEFORE the callback runs.  A callback is free to call
+ * back into this stack -- an upper layer's CLOSED handler may call
+ * mtk_tcp_close_all_conn().  If @c were still linked here, that call would
+ * find @c again and re-enter the very same callback: the web failsafe's
+ * reboot handler recursed this way, printing its "Rebooting now" line once
+ * per level and never reaching do_reset().  Clearing c->pdata likewise
+ * stops a second (nested) delivery from handing already-freed private data
+ * to the handler.
+ *
+ * @c must not be touched afterwards.
+ */
+static void mtk_tcp_conn_finish(struct mtk_tcp_conn *c,
+				enum mtk_tcp_cb_status status)
+{
+	struct mtk_tcp_cb_data cbd = {};
+	mtk_tcp_conn_cb cb;
+	void *pdata;
+
+	list_del(&c->node);
+	cb = c->cb;
+	pdata = c->pdata;
+	c->cb = NULL;
+	c->pdata = NULL;
+
+	if (cb && pdata) {
+		cbd.conn = c;
+		cbd.sip = c->ip_remote.s_addr;
+		cbd.sp = c->port_remote;
+		cbd.dp = c->port_local;
+		cbd.pdata = pdata;
+		cbd.status = status;
+
+		assert((size_t)cb > gd->ram_base);
+		cb(&cbd);
+	}
+
+	free(c);
+}
+
+/*
  * Tear a connection down immediately: reset the peer, notify the upper layer
  * so it can free its private data, and drop the connection from conn_head.
  *
@@ -1401,8 +1460,6 @@ int mtk_tcp_send_data(const void *conn, const void *data, u32 size)
  */
 static void mtk_tcp_conn_teardown(struct mtk_tcp_conn *c)
 {
-	struct mtk_tcp_cb_data cbd = {};
-
 	/*
 	 * Only reset when the peer MAC is known.  Otherwise
 	 * mtk_tcp_send_packet_opt() would kick off an ARP request for a
@@ -1413,19 +1470,7 @@ static void mtk_tcp_conn_teardown(struct mtk_tcp_conn *c)
 		mtk_tcp_send_packet(c, MTK_TCP_RST | MTK_TCP_ACK,
 				    c->local_seq, c->peer_seq, NULL, 0);
 
-	if (c->cb && c->pdata) {
-		cbd.conn = c;
-		cbd.sip = c->ip_remote.s_addr;
-		cbd.sp = c->port_remote;
-		cbd.dp = c->port_local;
-		cbd.pdata = c->pdata;
-		cbd.status = MTK_TCP_CB_CLOSED;
-
-		assert((size_t)c->cb > gd->ram_base);
-		c->cb(&cbd);
-	}
-
-	mtk_tcp_conn_del(c);
+	mtk_tcp_conn_finish(c, MTK_TCP_CB_CLOSED);
 }
 
 int mtk_tcp_close_conn(const void *conn, int rst)
@@ -1449,8 +1494,21 @@ void mtk_tcp_close_all_conn(void)
 	struct list_head *lh, *n;
 	struct mtk_tcp_conn *c;
 	struct mtk_tcp_listen *l;
+	static bool tearing_down;
 
 	mtk_tcp_log("[MTK_TCP] mtk_tcp_close_all_conn: stop=%d\n", mtk_tcp_stop);
+
+	/*
+	 * A connection callback invoked below may legitimately call this
+	 * function again.  The outer list_for_each_safe() has already
+	 * stashed the "next" pointer, so a nested run would free it and
+	 * make the outer loop walk freed memory.  The outer run disposes of
+	 * every connection anyway, so the nested one has nothing to do.
+	 */
+	if (tearing_down)
+		return;
+
+	tearing_down = true;
 
 	list_for_each_safe(lh, n, &conn_head) {
 		c = list_entry(lh, struct mtk_tcp_conn, node);
@@ -1482,6 +1540,8 @@ void mtk_tcp_close_all_conn(void)
 	 */
 	if (arp_is_waiting())
 		arp_wait_clear();
+
+	tearing_down = false;
 
 	mtk_tcp_stop = 1;
 }
