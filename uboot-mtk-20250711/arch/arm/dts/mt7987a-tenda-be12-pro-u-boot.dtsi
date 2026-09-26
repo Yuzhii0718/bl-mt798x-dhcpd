@@ -1,0 +1,27 @@
+// SPDX-License-Identifier: GPL-2.0
+
+/*
+ * U-Boot-only hardware description for Tenda BE12 Pro.
+ *
+ * The OEM U-Boot control DT uses the same MT7987 RFB Ethernet topology:
+ *   GMAC0 -> AN8855, reset GPIO42 ACTIVE_HIGH
+ *   GMAC1 -> internal 2.5G PHY @15 (XGMII)
+ *   GMAC2 -> EN8811H @11, reset GPIO48 ACTIVE_HIGH
+ *
+ * Reuse the upstream RFB description so PHY/switch reset semantics stay
+ * aligned with the MediaTek U-Boot drivers.
+ */
+#include "mt7987a-rfb-u-boot.dtsi"
+
+/ {
+	model = "Tenda BE12 Pro";
+	compatible = "tenda,be12-pro", "mediatek,mt7987", "mediatek,mt7987-spim-nand-rfb";
+
+	bl2_verify {
+		bl2_compatible = "spim-nand";
+	};
+};
+
+&spi2 {
+	status = "disabled";
+};

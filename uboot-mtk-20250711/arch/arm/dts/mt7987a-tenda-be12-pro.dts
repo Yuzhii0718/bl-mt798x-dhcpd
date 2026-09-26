@@ -1,0 +1,64 @@
+// SPDX-License-Identifier: (GPL-2.0 OR MIT)
+
+/dts-v1/;
+#include "mt7987a.dtsi"
+#include "mt7987-spim-nand.dtsi"
+#include <dt-bindings/input/input.h>
+
+/ {
+	model = "Tenda BE12 Pro";
+	compatible = "tenda,be12-pro", "mediatek,mt7987a", "mediatek,mt7987";
+
+	chosen {
+		bootargs = "console=ttyS0,115200n1 loglevel=8 earlycon=uart8250,mmio32,0x11000000 pci=pcie_bus_perf ubi.block=0,firmware root=/dev/fit0 rootwait";
+		stdout-path = "serial0:115200n1";
+	};
+
+	aliases {
+		serial0 = &uart0;
+		led-boot = &status_green;
+		led-failsafe = &status_red;
+		led-running = &status_green;
+		led-upgrade = &status_red;
+	};
+
+	config {
+		bootcmd = "mtkboardboot";
+		blink_led = "status:red";
+		system_led = "status:green";
+	};
+
+	gpio-keys {
+		compatible = "gpio-keys";
+
+		reset {
+			label = "reset";
+			linux,code = <KEY_RESTART>;
+			gpios = <&pio 1 GPIO_ACTIVE_LOW>;
+			debounce-interval = <10>;
+		};
+
+		wps {
+			label = "wps";
+			linux,code = <KEY_WPS_BUTTON>;
+			gpios = <&pio 0 GPIO_ACTIVE_LOW>;
+			debounce-interval = <10>;
+		};
+	};
+
+	gpio-leds {
+		compatible = "gpio-leds";
+
+		status_green: status-green {
+			label = "status:green";
+			gpios = <&pio 6 GPIO_ACTIVE_LOW>;
+			default-state = "off";
+		};
+
+		status_red: status-red {
+			label = "status:red";
+			gpios = <&pio 7 GPIO_ACTIVE_LOW>;
+			default-state = "off";
+		};
+	};
+};
