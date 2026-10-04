@@ -1390,6 +1390,12 @@ function getmtdlayoutlist() {
                 }
             }
 
+            // Preselect the layout in use, so flashing without touching the
+            // list doesn't silently switch (and rebuild) the layout.
+            const current = layoutNames[0];
+            if (current && Array.from(layoutSelect.options).some((o) => o.value === current))
+                layoutSelect.value = current;
+
             const layoutContainer = document.getElementById("mtd_layout");
             if (layoutContainer) layoutContainer.style.display = hasOptions ? "" : "none";
         },
