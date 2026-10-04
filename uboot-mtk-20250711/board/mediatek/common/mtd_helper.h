@@ -38,6 +38,14 @@ void gen_mtd_probe_devices(void);
 bool mtd_nmbm_enabled(void);
 
 int ubi_mount_default(void);
+
+#if defined(CONFIG_CMD_UBI) && defined(CONFIG_MEDIATEK_MULTI_MTD_LAYOUT)
+void mtd_layout_switch_begin(void);
+void mtd_layout_switch_end(void);
+#else
+static inline void mtd_layout_switch_begin(void) {}
+static inline void mtd_layout_switch_end(void) {}
+#endif
 int update_ubi_volume_raw(struct ubi_volume *vol, const char *volume,
 			  int vol_id, const void *data, size_t size,
 			  uint64_t reserved_size, bool dynamic);
