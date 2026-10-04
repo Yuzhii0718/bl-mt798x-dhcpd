@@ -73,5 +73,6 @@ $(call MAKE_DEP,bl2,bl2_boot_ram,RAM_BOOT_DEBUGGER_HOOK RAM_BOOT_UART_DL)
 $(call MAKE_DEP,bl2,bl2_boot_nand_nmbm,NMBM_MAX_RATIO NMBM_MAX_RESERVED_BLOCKS NMBM_DEFAULT_LOG_LEVEL)
 $(call MAKE_DEP,bl2,mt7986_gpio,ENABLE_JTAG)
 
-$(call GEN_DEP_RULES,bl31,bl31_plat_setup)
+$(call GEN_DEP_RULES,bl31,bl31_plat_setup devapc)
 $(call MAKE_DEP,bl31,bl31_plat_setup,ANTI_ROLLBACK TRUSTED_BOARD_BOOT)
+$(call MAKE_DEP,bl31,devapc,MT7986_TRNG_NS_ACCESS)

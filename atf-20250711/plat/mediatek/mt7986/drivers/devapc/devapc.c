@@ -9,6 +9,16 @@
 
 #include <devapc.h>
 
+/*
+ * TRNG is secure-only by default (random numbers are provided through the
+ * MTK_SIP_TRNG_GET_RND SMC). Legacy vendor kernels access it directly.
+ */
+#ifdef MT7986_TRNG_NS_ACCESS
+#define TRNG_APB_S_DOMAIN0_PERM		NO_PROTECTION
+#else
+#define TRNG_APB_S_DOMAIN0_PERM		SEC_RW_ONLY
+#endif
+
 /* Infra_ao */
 static const struct APC_INFRA_PERI_DOM_16 INFRA_AO_SYS0_Devices[] = {
 
@@ -440,7 +450,7 @@ DAPC_INFRA_AO_SYS0_ATTR("INFRACFG_PDN_AUTO_APB_S",
 			FORBIDDEN,     FORBIDDEN,     FORBIDDEN,     FORBIDDEN,
 			FORBIDDEN,     FORBIDDEN,     FORBIDDEN,     FORBIDDEN),
 DAPC_INFRA_AO_SYS0_ATTR("TRNG_APB_S",
-			SEC_RW_ONLY,   FORBIDDEN,     FORBIDDEN,     FORBIDDEN,
+			TRNG_APB_S_DOMAIN0_PERM, FORBIDDEN,     FORBIDDEN,     FORBIDDEN,
 			FORBIDDEN,     FORBIDDEN,     FORBIDDEN,     FORBIDDEN,
 			FORBIDDEN,     FORBIDDEN,     FORBIDDEN,     FORBIDDEN,
 			FORBIDDEN,     FORBIDDEN,     FORBIDDEN,     FORBIDDEN),

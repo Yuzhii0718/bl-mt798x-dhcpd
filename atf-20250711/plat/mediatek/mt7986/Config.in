@@ -70,4 +70,22 @@ config MT7986_TRNG_VERSION
 	default 1 if MT7986_TRNG_V1
 	default 2 if MT7986_TRNG_V2
 
+config _MT7986_TRNG_NS_ACCESS
+	bool "Allow non-secure world to access TRNG registers directly"
+	default n
+	help
+	  By default BL31 restricts the TRNG to secure world only and exposes
+	  random numbers through the MTK_SIP_TRNG_GET_RND SMC call.
+	  Vendor firmwares based on the MediaTek SDK kernel 5.4 read the TRNG
+	  registers directly and fail (hwrng errors) with this restriction.
+	  Say Y here to keep both the SMC interface and direct register access
+	  working, e.g. for boards which must boot both stock and OpenWrt
+	  firmware.
+
+# Makefile option
+config MT7986_TRNG_NS_ACCESS
+	int
+	default 1
+	depends on _MT7986_TRNG_NS_ACCESS
+
 endif # _PLAT_MT7986

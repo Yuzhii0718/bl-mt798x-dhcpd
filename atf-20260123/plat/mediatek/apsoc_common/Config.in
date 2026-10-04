@@ -754,6 +754,7 @@ config ENABLE_BL31_RUNTIME_LOG
 	default 1
 	depends on _ENABLE_BL31_RUNTIME_LOG
 
+source "plat/mediatek/mt7986/Config.in"
 source "plat/mediatek/mt7987/Config.in"
 source "plat/mediatek/mt7988/Config.in"
 
