@@ -1,0 +1,77 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Netis NX62 (hardware twin of Netcore N60 Pro)
+ * MT7986A, DDR4 512M/1G/2G, 128 MiB SPI-NAND (2K page, 128K block)
+ *
+ * This bootloader accesses the SPI-NAND directly (no NMBM), exactly like the
+ * official OpenWrt bootloader and kernel. The stock firmware (and NMBM based
+ * third-party builds) keep their data inside the first 120 MiB, the NMBM
+ * management area at the end of the flash is never touched by the "default"
+ * layout.
+ */
+
+/dts-v1/;
+#include "mt7986a-netcore-n60.dtsi"
+
+/ {
+	model = "Netis NX62";
+	compatible = "netis,nx62", "netcore,n60-pro", "mediatek,mt7986";
+
+	config {
+		blink_led = "blue:power";
+		system_led = "blue:power";
+	};
+
+	mtd-layout {
+		layout@0 {
+			/*
+			 * Stock Netis/Netcore firmware and NMBM based builds
+			 * (Kwrt, ImmortalWrt mt798x, ...): kernel/rootfs UBI
+			 * volumes inside 117248k "ubi", NMBM area behind it.
+			 */
+			label = "default";
+			mtdids = "spi-nand0=spi-nand0";
+			mtdparts = "spi-nand0:1024k(bl2),512k(u-boot-env),2048k(factory),2048k(fip),117248k(ubi)";
+		};
+
+		layout@1 {
+			/*
+			 * Official OpenWrt 24.10/25.12 and ImmortalWrt 24.10+
+			 * (device netcore_n60-pro): "fit" UBI volume, "ubi"
+			 * spans the rest of the flash (0x580000-0x8000000).
+			 */
+			label = "openwrt";
+			mtdids = "spi-nand0=spi-nand0";
+			mtdparts = "spi-nand0:1024k(bl2),512k(u-boot-env),2048k(factory),2048k(fip),125440k(ubi)";
+		};
+	};
+
+	gpio-leds {
+		compatible = "gpio-leds";
+
+		led-0 {
+			label = "blue:wlan";
+			gpios = <&pio 1 GPIO_ACTIVE_LOW>;
+		};
+
+		led_power: led-1 {
+			label = "blue:power";
+			gpios = <&pio 29 GPIO_ACTIVE_LOW>;
+		};
+
+		led-2 {
+			label = "blue:usb";
+			gpios = <&pio 30 GPIO_ACTIVE_LOW>;
+		};
+
+		led-3 {
+			label = "blue:wps";
+			gpios = <&pio 31 GPIO_ACTIVE_LOW>;
+		};
+
+		led-4 {
+			label = "blue:wan";
+			gpios = <&pio 32 GPIO_ACTIVE_LOW>;
+		};
+	};
+};
