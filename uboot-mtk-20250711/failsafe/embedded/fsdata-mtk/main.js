@@ -62,6 +62,11 @@ function getmtdlayoutlist() {
                     hasOptions = true;
                 }
             }
+            /* Preselect the layout in use */
+            for (var j = 0; j < e.options.length; j++) {
+                if (e.options[j].value === mtd_layout[0])
+                    e.selectedIndex = j;
+            }
             document.getElementById('mtd_layout').style.display = hasOptions ? '' : 'none';
         }
     })

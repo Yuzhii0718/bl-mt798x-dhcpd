@@ -123,6 +123,9 @@ static void failsafe_prepare_mtd_layout(void)
 	if (!cur_layout || strcmp(cur_layout, mtd_layout_label) ||
 	    !env_layout || strcmp(env_layout, mtd_layout_label)) {
 		printf("httpd: switching mtd layout: %s\n", mtd_layout_label);
+#ifdef CONFIG_MTD
+		mtd_layout_switch_begin();
+#endif
 		env_set("mtd_layout", mtd_layout_label);
 		env_set("mtd_layout_label", mtd_layout_label);
 	}
@@ -428,6 +431,9 @@ void result_handler(enum httpd_uri_handler_status status,
 				st->ret = failsafe_write_image(upload_data,
 							       upload_size, fw_type);
 #ifdef CONFIG_MEDIATEK_MULTI_MTD_LAYOUT
+#ifdef CONFIG_MTD
+			mtd_layout_switch_end();
+#endif
 			if (st->ret)
 				mtd_layout_save_pending = false;
 #endif

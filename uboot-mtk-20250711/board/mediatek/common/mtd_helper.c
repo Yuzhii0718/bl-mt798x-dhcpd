@@ -716,9 +716,59 @@ static int write_ubi1_image(const void *data, size_t size,
 				  ii->ubi_size + ii->marker_size, true);
 }
 
+#ifdef CONFIG_MEDIATEK_MULTI_MTD_LAYOUT
+/*
+ * Set while an upgrade is written right after the MTD layout was switched.
+ * Every UBI partition mounted for writing during that upgrade is erased
+ * first, so nothing of the previous layout (UBI PEBs written with another
+ * partition size, NMBM management blocks, stale kernel/rootfs volumes)
+ * survives in the new partition.
+ */
+static bool ubi_layout_rebuild;
+static char ubi_layout_rebuilt_part[32];
+
+void mtd_layout_switch_begin(void)
+{
+	/*
+	 * UBI may still be attached to a partition of the old layout (e.g.
+	 * after a failed boot attempt). An attached partition can't be
+	 * deleted, so the new mtdparts would not be applied and ubi_part()
+	 * would reuse the stale attachment. Detach it first.
+	 */
+	ubi_detach();
+
+	ubi_layout_rebuild = true;
+	ubi_layout_rebuilt_part[0] = '\0';
+}
+
+void mtd_layout_switch_end(void)
+{
+	ubi_layout_rebuild = false;
+	ubi_layout_rebuilt_part[0] = '\0';
+}
+#endif
+
 static int mount_ubi(struct mtd_info *mtd, bool create)
 {
 	int ret;
+
+#ifdef CONFIG_MEDIATEK_MULTI_MTD_LAYOUT
+	if (create && ubi_layout_rebuild &&
+	    strcmp(ubi_layout_rebuilt_part, mtd->name)) {
+		cprintln(NORMAL, "*** MTD layout changed, rebuilding UBI on '%s' ***",
+			 mtd->name);
+
+		ubi_detach();
+
+		ret = mtd_erase_skip_bad(mtd, 0, mtd->size, mtd->size,
+					 NULL, NULL, NULL, false);
+		if (ret)
+			return ret;
+
+		strlcpy(ubi_layout_rebuilt_part, mtd->name,
+			sizeof(ubi_layout_rebuilt_part));
+	}
+#endif
 
 	ret = ubi_part(mtd->name, NULL);
 	if (ret) {
