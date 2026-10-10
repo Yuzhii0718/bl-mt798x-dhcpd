@@ -17,7 +17,13 @@ on:
         description: 'Model selection (board name, "all", or "all-mt7981/7986/7987/7988")'
         required: true
         default: 'all'
-        type: string
+        type: choice
+        options:
+          - all
+          - all-mt7981
+          - all-mt7986
+          - all-mt7987
+          - all mt7988
       FIP_VERSION: 
         description: 'FIP version selection ("all" option is only for single model builds)'
         required: true
