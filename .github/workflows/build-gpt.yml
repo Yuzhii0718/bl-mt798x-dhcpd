@@ -1,0 +1,38 @@
+name: Build BT-R320 GPT
+
+on:
+  workflow_dispatch:
+    inputs:
+      sdmmc:
+        description: 'SDMMC mode (eMMC)'
+        default: '1'
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install python2 + deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python2 python2-dev swig
+
+      - name: Make scripts executable
+        run: chmod +x generate_gpt.sh
+
+      - name: Generate GPT
+        run: |
+          if [ "${{ github.event.inputs.sdmmc }}" = "1" ]; then
+            SDMMC=1 ./generate_gpt.sh
+          else
+            ./generate_gpt.sh
+          fi
+
+      - name: Upload GPT bins
+        uses: actions/upload-artifact@v4
+        with:
+          name: bt-r320-gpt
+          path: output_gpt/**/*.bin
